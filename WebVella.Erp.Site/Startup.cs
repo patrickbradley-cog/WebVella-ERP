@@ -39,7 +39,7 @@ namespace WebVella.Erp.Site
             //legacy until we fix system tables
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-            string configPath = "config.json";
+            string configPath = "Config.json";
             Configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile(configPath).Build();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");

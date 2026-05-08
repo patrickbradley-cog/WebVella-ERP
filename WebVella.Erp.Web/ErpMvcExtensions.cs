@@ -44,7 +44,7 @@ namespace WebVella.Erp.Web
 				IWebHostEnvironment env = app.ApplicationServices.GetService<IWebHostEnvironment>();
 
 				if (!ErpSettings.IsInitialized) {
-					string configPath = "config.json";
+					string configPath = "Config.json";
 					if (!string.IsNullOrWhiteSpace(configFolder))
 						configPath = System.IO.Path.Combine(configFolder, configPath);
 

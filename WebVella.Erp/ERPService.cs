@@ -460,12 +460,17 @@ namespace WebVella.Erp
 						}
 
 						{
+							var seedFirstName = ErpSettings.Configuration["SeedUser:FirstName"] ?? "WebVella";
+							var seedLastName = ErpSettings.Configuration["SeedUser:LastName"] ?? "Erp";
+							var seedPassword = ErpSettings.Configuration["SeedUser:Password"] ?? "erp";
+							var seedEmail = ErpSettings.Configuration["SeedUser:Email"] ?? "erp@webvella.com";
+
 							EntityRecord user = new EntityRecord();
 							user["id"] = SystemIds.FirstUserId;
-							user["first_name"] = "WebVella";
-							user["last_name"] = "Erp";
-							user["password"] = "erp";
-							user["email"] = "erp@webvella.com";
+							user["first_name"] = seedFirstName;
+							user["last_name"] = seedLastName;
+							user["password"] = seedPassword;
+							user["email"] = seedEmail;
 							user["username"] = "administrator";
 							user["created_on"] = new DateTime(2010, 10, 10);
 							user["enabled"] = true;
