@@ -5,7 +5,7 @@ namespace WebVella.Erp.Plugins.TravelERP
 {
 	public partial class TravelErpPlugin : ErpPlugin
 	{
-		private const int TRAVELERP_INIT_VERSION = 20250101;
+		private const int TRAVELERP_INIT_VERSION = 0;
 
 		public void ProcessPatches()
 		{
