@@ -237,9 +237,9 @@ parameter, but it must be `ASC` or `DESC`.
 *Source: `WebVella.Erp/Eql/EqlSettings.cs`; `WebVella.Erp/Eql/EqlBuilder.Sql.cs` (`BuildSql`, `BuildFieldsSql`).*
 
 **Q10. EQL respects security and hooks.** Pre-search hooks can change the query or add errors before
-SQL is built. Read permission is checked while each returned row is converted: every selected field's entity
-(main or related) needs read access, or "No access to entity" is thrown. An empty result has no rows,
-so this check does not run. Post-search hooks see the results.
+SQL is built. Read permission is checked while returned rows are converted: each field's entity needs read
+access, or "No access to entity" is thrown. Related fields are checked only on related rows that
+exist, so an empty result, or a row with no related records, skips those checks. Post-search hooks see the results.
 *Source: `WebVella.Erp/Eql/EqlBuilder.cs` (`Build`); `WebVella.Erp/Eql/EqlCommand.cs` (`Execute`, `ConvertJObjectToEntityRecord`).*
 
 **Q11. A query may run for up to 10 minutes.** The SQL command timeout is 600 seconds.
