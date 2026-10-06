@@ -49,9 +49,9 @@ field, or more than one, is rejected.
 `last_modified_on`. The two date fields default to the current time. All are marked as system fields.
 *Source: `WebVella.Erp/Api/EntityManager.cs` (`EntityManager::CreateEntityDefaultFields`).*
 
-**E6. New entities are admin-only by default.** If no role lists are passed, read, create,
-update and delete are each granted to the Administrator role only. A missing icon
-becomes `fa fa-database`.
+**E6. Default entity permissions depend on how the entity is created.** The `CreateEntity`
+overload that takes separate role lists grants each missing list to the Administrator role only.
+The `InputEntity` overload turns missing lists into empty lists. A missing icon becomes `fa fa-database`.
 *Source: `WebVella.Erp/Api/EntityManager.cs` (`EntityManager::CreateEntity`, `ValidateEntity`).*
 
 **E7. Field ids and names are unique within an entity.** A second field with the same id
@@ -126,8 +126,9 @@ is skipped, so the old password is kept.
 target to origin. Deeper paths, unknown relations and multiselect relation fields are rejected.
 *Source: `WebVella.Erp/Api/RecordManager.cs` (`RecordManager::CreateRecord`, `UpdateRecord`).*
 
-**C6. A relation value must match exactly one related record.** If no related record matches,
-or more than one does, the operation fails.
+**C6. A relation value must match at least one related record.** No match always fails. More than
+one match fails for 1:1 relations and for the single-record side of a 1:N relation. On the many side
+of a 1:N, and for N:N, several matches are allowed.
 *Source: `WebVella.Erp/Api/RecordManager.cs` (`RecordManager::CreateRecord`, `UpdateRecord`).*
 
 **C7. Deleting a record also deletes its files.** Files referenced by the record's file fields
@@ -214,7 +215,8 @@ Related rows come back as a JSON list inside each record.
 be a field name.
 *Source: `WebVella.Erp/Eql/EqlBuilder.Sql.cs` (`ProcessExpressionOperandNode`, `ProcessExpressionNode`).*
 
-**Q5. `CONTAINS` and `STARTSWITH` ignore case.** They become `ILIKE '%x%'` and `ILIKE 'x%'`.
+**Q5. `CONTAINS` and `STARTSWITH` ignore case on text.** They become `ILIKE '%x%'` and `ILIKE 'x%'`.
+On a multiselect field, `CONTAINS` becomes array containment (`@>`) instead.
 The regex operators `~`, `~*`, `!~`, `!~*` are passed to PostgreSQL as is.
 *Source: `WebVella.Erp/Eql/EqlBuilder.Sql.cs` (`EqlBuilder::ProcessExpressionNode`).*
 
@@ -235,8 +237,9 @@ parameter, but it must be `ASC` or `DESC`.
 *Source: `WebVella.Erp/Eql/EqlSettings.cs`; `WebVella.Erp/Eql/EqlBuilder.Sql.cs` (`BuildSql`, `BuildFieldsSql`).*
 
 **Q10. EQL respects security and hooks.** Pre-search hooks can change the query or add errors before
-SQL is built. When results are read, every selected field's entity (main or related) is checked
-for read permission, and a missing right throws "No access to entity". Post-search hooks see the results.
+SQL is built. Read permission is checked while each returned row is converted: every selected field's entity
+(main or related) needs read access, or "No access to entity" is thrown. An empty result has no rows,
+so this check does not run. Post-search hooks see the results.
 *Source: `WebVella.Erp/Eql/EqlBuilder.cs` (`Build`); `WebVella.Erp/Eql/EqlCommand.cs` (`Execute`, `ConvertJObjectToEntityRecord`).*
 
 **Q11. A query may run for up to 10 minutes.** The SQL command timeout is 600 seconds.
@@ -300,8 +303,9 @@ years after the start time.
 **T3. "End by date" needs a date.** If the end type is `Date` and `EndDate` is empty, calculation fails.
 *Source: `WebVella.Erp/Recurrence/RecurrencePlan.cs` (`CalculateOccurrences`).*
 
-**T4. "End after N" returns exactly N occurrences when possible.** The window grows five years at a
-time until there are enough, then the list is cut to N.
+**T4. "End after N" returns N occurrences when possible.** If the first window is too short, it grows
+five years at a time until there are enough, then N are taken. Those N come from a `HashSet` and are
+not sorted first, so they are not guaranteed to be the earliest N.
 *Source: `WebVella.Erp/Recurrence/RecurrencePlan.cs` (`CalculateOccurrences`).*
 
 **T5. Monthly and yearly patterns follow the start date.** "Monthly by date" repeats on the start
@@ -335,8 +339,8 @@ do not add anything.
 status "not started" with `start_time` today or earlier to status "started".
 *Source: `WebVella.Erp.Plugins.Project/Jobs/StartTasksOnStartDate.cs`; `TaskService.cs` (`GetTasksThatNeedStarting`).*
 
-**P6. Open-task lists hide closed statuses.** Any status flagged `is_closed` is excluded from
-"due" task lists.
+**P6. Due-task lists hide closed statuses, the "All" list does not.** For any queue type other
+than `TasksDueType.All` (the default), statuses flagged `is_closed` are excluded.
 *Source: `WebVella.Erp.Plugins.Project/Services/TaskService.cs` (`TaskService::GetTaskQueue`).*
 
 **P7. A project time log must point at an existing task.** For time logs scoped to `projects`, the
